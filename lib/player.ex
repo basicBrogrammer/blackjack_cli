@@ -1,5 +1,5 @@
 defmodule Player do
-  defstruct hand: []
+  defstruct hand: [], name: ""
 
   def add_cards(player, cards) do
     %{player | hand: player.hand ++ cards}

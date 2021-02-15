@@ -7,9 +7,8 @@ defmodule Deck do
     |> Enum.flat_map(&(build_suit(&1)))
   end
 
-  def pull(deck, num \\ 2) do
-    cards = Enum.take_random(deck, num)
-    {deck -- cards, cards }
+  def pull(deck) do
+    deck |> Enum.take_random(1)
   end
 
   defp build_suit(suit) do
