@@ -5,10 +5,7 @@ defmodule Deck do
   def generate do
     @suits
     |> Enum.flat_map(&(build_suit(&1)))
-  end
-
-  def pull(deck) do
-    deck |> Enum.take_random(1)
+    |> Enum.shuffle()
   end
 
   defp build_suit(suit) do

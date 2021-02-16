@@ -5,22 +5,23 @@ defmodule Game do
     IO.puts("Welcome to exBlackJack.")
   end
 
-  def setup do
-    game = %Game{}
-    for _ <- 1..(length(game.players) * 2) do
-      game |> deal_card(hd(game.players))
+  def deal(game) do
+    cond do
+      Game.cards_dealt(game.players) -> game
+      true -> game |> deal_card(hd(game.players)) |> deal
     end
   end
 
-  def deal_card(game, player) do
-    cards = game.cards |> Deck.pull()
+  def deal_card(%{cards: [card | cards]} = game, player) do
     game
-    |> remove_cards(cards)
-    |> update_players(Player.add_cards(player, cards))
+    |> update_players(Player.add_cards(player, card))
+    |> case do
+      game -> %{ game | cards: cards}
+    end
   end
 
-  defp remove_cards(game, cards) do
-    %{ game | cards: game.cards -- cards}
+  def cards_dealt(players) do
+    Enum.reduce(players, 0, fn player, acc -> acc + length(player.hand) end) == length(players) * 2
   end
 
   defp update_players(game, player) do
