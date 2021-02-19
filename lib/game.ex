@@ -1,10 +1,6 @@
 defmodule Game do
   @derive {Inspect, only: [:players]}
-  defstruct players: [%Player{name: "player_one"}, %Player{name: "dealer"}], cards: Deck.generate(), finished_players: []
-
-  def greet do
-    IO.puts("Welcome to exBlackJack.")
-  end
+  defstruct players: [%Player{name: "basicBrogrammer"}, %Dealer{}], cards: Deck.generate(), finished_players: []
 
   def play(%{players: []} = game) do
     game
@@ -20,11 +16,25 @@ defmodule Game do
   end
 
 
-  def turn(%{players: [current | players]} = game) do
-    IO.puts "Player: #{current.name} your move."
-    case IO.gets("Hit or Stay\n") |> String.downcase |> String.trim do
+  def turn(%{players: [%Dealer{} = dealer | players]} = game) do
+    cond do
+      dealer.total >= 17 -> %{game | players: players, finished_players: [dealer | game.finished_players]}
+      true -> deal_card(game, dealer)
+    end
+    |> inspect_table()
+    |> (fn (game) ->
+      IO.gets("Press enter to continue.")
+      game
+    end).()
+  end
+
+  def turn(%{players: [%Player{} = current | players]} = game) do
+    IO.puts "\n#{current.name} your move."
+    case IO.gets("(H)it or (S)tay\n") |> String.downcase |> String.trim do
       "hit" -> deal_card(game, current)
+      "h" -> deal_card(game, current)
       "stay" -> %{game | players: players, finished_players: [current | game.finished_players]}
+      "s" -> %{game | players: players, finished_players: [current | game.finished_players]}
       _ -> game
     end
   end
@@ -40,9 +50,9 @@ defmodule Game do
     game
   end
 
-  def deal(%{players: [player | _] } =game) do
+  defp deal(%{players: [player | _] } =game) do
     cond do
-      Game.cards_dealt(game.players) -> game
+      cards_dealt(game.players) -> game
       true ->
         game
         |> deal_card(player)
@@ -51,7 +61,7 @@ defmodule Game do
     end
   end
 
-  def deal_card(%{cards: [card | cards]} = game, player) do
+  defp deal_card(%{cards: [card | cards]} = game, player) do
     game
     |> update_players(Player.add_card(player, card))
     |> case do
@@ -59,7 +69,7 @@ defmodule Game do
     end
   end
 
-  def cards_dealt(players) do
+  defp cards_dealt(players) do
     Enum.reduce(players, 0, fn player, acc -> acc + length(player.hand) end) >= length(players) * 2
   end
 
