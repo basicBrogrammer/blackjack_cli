@@ -7,6 +7,6 @@ defmodule BlackjackCli do
   Starts the game
   """
   def start do
-    game = %Game{}
+    Game.play(%Game{})
   end
 end
